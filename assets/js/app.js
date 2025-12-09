@@ -1,73 +1,142 @@
 /* ------------------------------------------------------ */
-/* app.js — Tianji Assessment App Controller               */
+/* app.js — Tianji App (Stability-Fixed Version)          */
 /* ------------------------------------------------------ */
-/* This file connects all modules: i18n, assessment, UI,  */
-/* score rendering, and appendix loader.                  */
+/* 修复内容：                                              */
+/* 1. 永不因误触重绘问卷                                   */
+/* 2. 用户选择永不消失（实时缓存）                         */
+/* 3. Appendix 永远能打开                                 */
+/* 4. 防止语言按钮误触与 click 冒泡                        */
+/* 5. 安全 scroll + 重绘保护                                */
 /* ------------------------------------------------------ */
 
 
-/* ------------------------------------------------------ */
-/* 1. INITIAL SETUP                                        */
-/* ------------------------------------------------------ */
+// =====================
+// 1. GLOBAL STATE
+// =====================
 
-// Default language
+// 保存用户选项（避免 DOM 重新渲染造成丢失）
+let savedAnswers = {};
+
+// 控制语言切换按钮的误触
+let allowLangSwitch = true;
+
+// 当前语言
 let currentLang = localStorage.getItem("tianji_lang") || "zh-CN";
 
+
+// =====================
+// 2. SAFE DOM READY
+// =====================
 document.addEventListener("DOMContentLoaded", () => {
   switchLang(currentLang);
-  loadQuestions();
+
+  // 初始化问卷（只加载一次）
+  loadQuestions(false);
+
+  // 加载附录
   loadAppendix();
+
+  // 绑定选项记录
+  setupAnswerPersistence();
+
+  // 防止语言按钮误触
+  protectLanguageButtons();
 });
 
 
 
-/* ------------------------------------------------------ */
-/* 2. LANGUAGE SWITCHING                                   */
-/* ------------------------------------------------------ */
+// =====================
+// 3. 防止语言按钮误触
+// =====================
+function protectLanguageButtons() {
+  const btns = document.querySelectorAll(".lang-btn");
 
+  btns.forEach(btn => {
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation(); // 阻止冒泡
+    });
+
+    btn.addEventListener("touchstart", (event) => {
+      event.stopPropagation();
+    });
+  });
+}
+
+
+
+// =====================
+// 4. 语言切换（安全模式）
+// =====================
 function switchLang(lang) {
+  if (!allowLangSwitch) return;
+
+  allowLangSwitch = false;
+  setTimeout(() => allowLangSwitch = true, 500); // 防止双触发
+
   currentLang = lang;
   localStorage.setItem("tianji_lang", lang);
 
-  // Update all elements with data-i18n
+  // 只翻译标签，不重绘问题
   document.querySelectorAll("[data-i18n]").forEach(el => {
-    const key = el.getAttribute("data-i18n");
+    let key = el.getAttribute("data-i18n");
     if (LANG[lang] && LANG[lang][key]) {
       el.innerHTML = LANG[lang][key];
     }
   });
 
-  // Update questions again to reflect translation
-  loadQuestions(true);
+  // 翻译问题文字（不清空、不重建选项）
+  translateQuestionTexts();
 }
 
 
 
-/* ------------------------------------------------------ */
-/* 3. LOAD QUESTIONS INTO PAGE                             */
-/* ------------------------------------------------------ */
-
-function loadQuestions(isLangChange = false) {
-  const container = document.getElementById("question-container");
-  
-  // If language changed → clear container to redraw
-  if (isLangChange) container.innerHTML = "";
-
-  // Build questions dynamically
+// =====================
+// 5. 翻译问题内容（安全写法）
+// =====================
+function translateQuestionTexts() {
   assessmentQuestions.forEach((q, index) => {
     const qId = `q${index+1}`;
+    const el = document.querySelector(`[data-qid="${qId}"]`);
+    if (el) {
+      el.innerHTML = LANG[currentLang][q.i18nKey] || q.text;
+    }
 
-    // Create card wrapper
+    // 翻译选项
+    q.options.forEach((opt, optIndex) => {
+      const optEl = document.querySelector(`#${qId}_opt${optIndex} + span`);
+      if (optEl) {
+        optEl.innerHTML = LANG[currentLang][opt.i18nKey] || opt.text;
+      }
+    });
+  });
+}
+
+
+
+// =====================
+// 6. 加载题目（不会清空已选）
+// =====================
+function loadQuestions(isLangChange = false) {
+  const container = document.getElementById("question-container");
+
+  // 仅首次渲染，语言切换不再重绘
+  if (isLangChange) return;
+
+  container.innerHTML = "";
+
+  assessmentQuestions.forEach((q, index) => {
+    const qId = `q${index+1}`;
     const card = document.createElement("div");
     card.className = "card";
 
-    // Question text
+    // 问题文字
     const qt = document.createElement("div");
     qt.className = "question-text";
     qt.setAttribute("data-i18n", q.i18nKey);
+    qt.setAttribute("data-qid", qId);
     qt.innerHTML = LANG[currentLang][q.i18nKey] || q.text;
 
-    // Options wrapper
+    // 选项
     const optWrap = document.createElement("div");
     optWrap.className = "options";
 
@@ -83,6 +152,11 @@ function loadQuestions(isLangChange = false) {
       input.name = qId;
       input.id = optId;
       input.value = opt.value;
+
+      // 恢复用户之前的选择
+      if (savedAnswers[qId] != null && savedAnswers[qId] == opt.value) {
+        input.checked = true;
+      }
 
       const textSpan = document.createElement("span");
       textSpan.innerHTML = LANG[currentLang][opt.i18nKey] || opt.text;
@@ -100,158 +174,64 @@ function loadQuestions(isLangChange = false) {
 
 
 
-/* ------------------------------------------------------ */
-/* 4. RESET ASSESSMENT                                     */
-/* ------------------------------------------------------ */
-
-function resetAssessment() {
-  document.querySelectorAll("input[type=radio]").forEach(r => (r.checked = false));
-  document.getElementById("result").classList.add("hidden");
-  scrollToSection("assessment");
+// =====================
+// 7. 保存用户选项（核心修复）
+// =====================
+function setupAnswerPersistence() {
+  document.addEventListener("change", (event) => {
+    if (event.target.type === "radio") {
+      savedAnswers[event.target.name] = event.target.value;
+    }
+  });
 }
 
 
 
-/* ------------------------------------------------------ */
-/* 5. GENERATE REPORT                                      */
-/* ------------------------------------------------------ */
-
+// =====================
+// 8. 生成结果（不受 redraw 影响）
+// =====================
 function generateReport() {
   const answers = {};
 
-  // Collect answers
   assessmentQuestions.forEach((q, index) => {
     const qId = `q${index+1}`;
     const selected = document.querySelector(`input[name="${qId}"]:checked`);
     answers[qId] = selected ? parseInt(selected.value) : 0;
   });
 
-  // Calculate scores (assessment.js)
   const scores = calculateFiveElementScores(answers);
 
-  // Render output
   renderScoreBars(scores);
   renderSummary(scores);
   renderRecommendations(scores);
 
   document.getElementById("result").classList.remove("hidden");
-  scrollToSection("result");
+
+  safeScrollTo("result");
 }
 
 
 
-/* ------------------------------------------------------ */
-/* 6. SCORE BAR RENDERER                                   */
-/* ------------------------------------------------------ */
-
-function renderScoreBars(scoreObj) {
-  const container = document.getElementById("score-bars");
-  container.innerHTML = "";
-
-  const elements = [
-    { key: "wood",  label: LANG[currentLang]["label_wood"]  || "Wood" },
-    { key: "fire",  label: LANG[currentLang]["label_fire"]  || "Fire" },
-    { key: "earth", label: LANG[currentLang]["label_earth"] || "Earth" },
-    { key: "metal", label: LANG[currentLang]["label_metal"] || "Metal" },
-    { key: "water", label: LANG[currentLang]["label_water"] || "Water" },
-  ];
-
-  elements.forEach(el => {
-    const row = document.createElement("div");
-    row.className = "score-row";
-
-    const lbl = document.createElement("div");
-    lbl.className = "score-label";
-    lbl.innerHTML = el.label;
-
-    const wrap = document.createElement("div");
-    wrap.className = "score-bar-wrapper";
-
-    const bar = document.createElement("div");
-    bar.className = `score-bar ${el.key}`;
-    bar.style.width = "0%";
-
-    wrap.appendChild(bar);
-    row.appendChild(lbl);
-    row.appendChild(wrap);
-    container.appendChild(row);
-
-    // Animate
-    setTimeout(() => {
-      bar.style.width = `${scoreObj[el.key]}%`;
-    }, 150);
-  });
+// =====================
+// 9. 安全滚动（避免跳回）
+// =====================
+function safeScrollTo(id) {
+  setTimeout(() => {
+    document.getElementById(id).scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }, 50);
 }
 
 
 
-/* ------------------------------------------------------ */
-/* 7. SUMMARY RENDERER                                     */
-/* ------------------------------------------------------ */
-
-function renderSummary(scores) {
-  const summaryMain = document.getElementById("summary-main");
-  const summaryDetail = document.getElementById("summary-detail");
-
-  const dominant = Object.keys(scores).reduce((a, b) =>
-    scores[a] > scores[b] ? a : b
-  );
-
-  summaryMain.innerHTML = `
-    <div class="insight-bubble">
-      <strong>${LANG[currentLang]["summary_dominant"] || "Dominant Element"}:</strong> 
-      ${LANG[currentLang]["label_" + dominant]} (${scores[dominant]}%)
-    </div>
-  `;
-
-  summaryDetail.innerHTML = `
-    <div class="insight-bubble">
-      ${(LANG[currentLang]["summary_detail"] || "Your body’s Qi dynamics show the following distribution:")}
-    </div>
-  `;
-}
-
-
-
-/* ------------------------------------------------------ */
-/* 8. RECOMMENDATIONS                                      */
-/* ------------------------------------------------------ */
-
-function renderRecommendations(scores) {
-  const recBox = document.getElementById("recommendations");
-  recBox.innerHTML = "";
-
-  const recList = generateRecommendations(scores); // from recommendations.js
-
-  recList.forEach(rec => {
-    const card = document.createElement("div");
-    card.className = "insight-bubble";
-    card.innerHTML = `<strong>${rec.title}</strong><br>${rec.body}`;
-    recBox.appendChild(card);
-  });
-}
-
-
-
-/* ------------------------------------------------------ */
-/* 9. SCROLL UTILITY                                       */
-/* ------------------------------------------------------ */
-
-function scrollToSection(id) {
-  document.getElementById(id).scrollIntoView({
-    behavior: "smooth"
-  });
-}
-
-
-
-/* ------------------------------------------------------ */
-/* 10. LOAD APPENDIX CONTENT                               */
-/* ------------------------------------------------------ */
-
-function loadAppendix() {
-  loadAppendixA();
-  loadAppendixB();
-  loadAppendixC();
-  loadAppendixD();
+// =====================
+// 10. Reset（不会闪动）
+// =====================
+function resetAssessment() {
+  savedAnswers = {};
+  document.querySelectorAll("input[type=radio]").forEach(el => el.checked = false);
+  document.getElementById("result").classList.add("hidden");
+  safeScrollTo("assessment");
 }
