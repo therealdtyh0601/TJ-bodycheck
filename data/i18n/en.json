@@ -1,1 +1,33 @@
+{
+  "app_title": "Tianji Body Rhythm Assessment",
 
+  "nav_home": "Home",
+  "nav_start": "Start",
+  "nav_appendix": "Appendix",
+
+  "home_title": "Tianji Self-Assessment",
+  "home_subtitle": "A Five-Element Qi Dynamics Observation Tool",
+  "home_disclaimer": "This tool provides Tianji-based self-observation. It is not a medical diagnostic system.",
+  "btn_start": "Start Assessment",
+
+  "btn_generate": "Generate Body Map",
+  "btn_reset": "Reset",
+  "btn_redo": "Redo",
+  "btn_appendix": "View Appendix",
+
+  "assessment_title": "Assessment Questionnaire",
+
+  "label_wood": "Wood",
+  "label_fire": "Fire",
+  "label_earth": "Earth",
+  "label_metal": "Metal",
+  "label_water": "Water",
+
+  "summary_dominant": "Dominant Element",
+  "summary_detail": "Your Qi dynamic distribution is as follows:",
+
+  "opt_no": "No",
+  "opt_slight": "Mild",
+  "opt_often": "Frequent",
+  "opt_strong": "Strong"
+}
