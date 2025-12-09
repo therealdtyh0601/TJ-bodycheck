@@ -1,0 +1,33 @@
+{
+  "app_title": "天纪身体节律评估",
+
+  "nav_home": "首页",
+  "nav_start": "开始",
+  "nav_appendix": "附录",
+
+  "home_title": "天纪身体状态自评",
+  "home_subtitle": "基于五行气机的节律观察工具",
+  "home_disclaimer": "本工具用于依据天纪结构进行自我观察，不构成医疗诊断或治疗建议。",
+  "btn_start": "开始评估",
+
+  "btn_generate": "生成天纪身体图谱",
+  "btn_reset": "清空重填",
+  "btn_redo": "重新评估",
+  "btn_appendix": "查看附录",
+
+  "assessment_title": "身体状态问卷",
+
+  "label_wood": "木",
+  "label_fire": "火",
+  "label_earth": "土",
+  "label_metal": "金",
+  "label_water": "水",
+
+  "summary_dominant": "主导五行",
+  "summary_detail": "你的五行气机呈现以下分布：",
+
+  "opt_no": "没有",
+  "opt_slight": "轻微",
+  "opt_often": "明显",
+  "opt_strong": "严重"
+}
