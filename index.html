@@ -3,151 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tianji 身体节律评估 2.0 | Lumi Studio</title>
 
-  <title>Tianji Body Rhythm Assessment | Lumi Studio</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/base.css" />
-  <link rel="stylesheet" href="assets/css/layout.css" />
-  <link rel="stylesheet" href="assets/css/components.css" />
-  <link rel="stylesheet" href="assets/css/theme-light.css" />
-
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-  <!-- ========================================= -->
-  <!-- NAVIGATION BAR                            -->
-  <!-- ========================================= -->
+  <!-- 顶部导航 -->
   <nav class="tianji-nav">
-    <div class="nav-title">Tianji 身体节律评估</div>
-
+    <div class="nav-title">Tianji 身体节律评估 2.0</div>
     <div class="nav-group">
-      <button class="nav-btn" onclick="safeScrollTo('home')">首页</button>
-      <button class="nav-btn" onclick="safeScrollTo('assessment')">评估</button>
-      <button class="nav-btn" onclick="safeScrollTo('appendix')">附录</button>
-
-      <!-- language indicator -->
-      <div id="lang-indicator" class="lang-display">CN</div>
-
-      <!-- Language Buttons -->
-      <div class="lang-btn-group">
-        <button class="lang-btn" onclick="switchLang('zh-CN')">简体</button>
-        <button class="lang-btn" onclick="switchLang('zh-TW')">繁體</button>
-        <button class="lang-btn" onclick="switchLang('en')">EN</button>
-      </div>
+      <button class="nav-btn" onclick="scrollToSection('home')">首页</button>
+      <button class="nav-btn" onclick="scrollToSection('assessment')">评估</button>
+      <button class="nav-btn" onclick="scrollToSection('result')">结果</button>
+      <button class="nav-btn" onclick="scrollToSection('appendix')">附录</button>
     </div>
   </nav>
 
-
-  <!-- ========================================= -->
-  <!-- HOME SECTION                              -->
-  <!-- ========================================= -->
+  <!-- 首页 -->
   <section id="home" class="section">
     <div class="container">
-      <h1 data-i18n="home_title">天纪身体节律评估</h1>
-      <p data-i18n="home_subtitle">
-        通过五行动态模型，观察你当前的身心节律与能量走向。
+      <h1>天纪身体节律评估 2.0</h1>
+      <p class="subtitle">
+        以五行动态为骨架，帮你快速了解当前「肝木、心火、脾土、肺金、肾水」的节律偏向。
       </p>
+      <div class="start-box">
+        <button class="btn-primary" onclick="scrollToSection('assessment')">
+          开始评估
+        </button>
+      </div>
 
-      <button class="btn-primary" onclick="safeScrollTo('assessment')">
-        开始评估
-      </button>
+      <div class="disclaimer-card">
+        本工具为 <strong>自我观察与教育用途</strong>，不能替代任何医疗诊断或治疗。如有身体不适，请及时就医。
+      </div>
     </div>
   </section>
 
-
-  <!-- ========================================= -->
-  <!-- ASSESSMENT SECTION                        -->
-  <!-- ========================================= -->
+  <!-- 评估问卷 -->
   <section id="assessment" class="section">
     <div class="container">
-      <h2 data-i18n="assessment_title">评估问卷</h2>
-      <p data-i18n="assessment_desc">
-        根据你的状态选择最贴近的描述，完成后将生成你的天纪状态分析。
+      <h2>评估问卷</h2>
+      <p class="subtitle">
+        请根据最近一两个月的状态作答，选择「最贴近」你的描述。
       </p>
 
       <div id="question-container"></div>
 
-      <div style="margin-top: 32px;">
-        <button class="btn-primary" onclick="generateReport()" data-i18n="btn_generate">
+      <div class="assessment-actions">
+        <button class="btn-primary" onclick="generateReport()">
           生成报告
         </button>
-        <button class="btn-secondary" onclick="resetAssessment()" data-i18n="btn_reset">
+        <button class="btn-secondary" onclick="resetAssessment()">
           重置
         </button>
       </div>
     </div>
   </section>
 
-
-  <!-- ========================================= -->
-  <!-- RESULT SECTION                            -->
-  <!-- ========================================= -->
+  <!-- 结果区：初始隐藏 -->
   <section id="result" class="section hidden">
     <div class="container">
-
-      <h2 data-i18n="result_title">你的天纪节律图谱</h2>
+      <h2>你的天纪节律图谱</h2>
+      <p class="subtitle">
+        以下是根据你作答推算出的五行相对活跃度（% 为相对占比，并非医学指标）。
+      </p>
 
       <div id="score-bars"></div>
 
       <div id="summary-block" class="summary-block"></div>
 
-      <h3 data-i18n="recommendations_title">改善建议</h3>
+      <h3>改善建议（简版）</h3>
       <div id="recommendations-block" class="recommendations-block"></div>
 
-      <div style="margin-top: 32px;">
-        <button class="result-btn" onclick="safeScrollTo('appendix')">
-          查看附录
+      <div class="result-nav">
+        <button class="btn-secondary" onclick="scrollToSection('appendix')">
+          查看附录术语
+        </button>
+        <button class="btn-ghost" onclick="scrollToSection('assessment')">
+          回到问卷调整答案
         </button>
       </div>
-
     </div>
   </section>
 
-
-  <!-- ========================================= -->
-  <!-- APPENDIX SECTION                          -->
-  <!-- ========================================= -->
+  <!-- 附录 -->
   <section id="appendix" class="section">
     <div class="container">
-      <h2 data-i18n="appendix_title">附录：术语与说明</h2>
+      <h2>附录：术语与说明</h2>
+      <p class="subtitle">
+        这里是「天纪表达 ⇄ 日常用语」的简易对照，方便给家人朋友看。
+      </p>
 
       <div id="appendix-container" class="appendix-card"></div>
 
-      <div style="margin-top: 32px;">
-        <button class="btn-secondary" onclick="safeScrollTo('assessment')">
+      <div class="assessment-actions">
+        <button class="btn-secondary" onclick="scrollToSection('assessment')">
           返回问卷
         </button>
       </div>
     </div>
   </section>
 
-
-  <!-- ========================================= -->
-  <!-- FOOTER                                    -->
-  <!-- ========================================= -->
+  <!-- 页脚 -->
   <footer class="footer">
     <div class="container">
-      <p>© 2025 Lumi Studio — Tianji System WebApp</p>
+      © 2025 Lumi Studio — Tianji 2.0 Prototype
     </div>
   </footer>
 
-
-  <!-- ========================================= -->
-  <!-- JAVASCRIPT FILES                          -->
-  <!-- ========================================= -->
-
-  <script src="assets/js/i18n.js"></script>
-  <script src="assets/js/assessment.js"></script>
-  <script src="assets/js/recommendations.js"></script>
-  <script src="assets/js/appendix.js"></script>
-
-  <!-- UI Layer（零干扰） -->
-  <script src="assets/js/ui.js"></script>
-
-  <!-- 主逻辑（稳定修复版） -->
-  <script src="assets/js/app.js"></script>
-
+  <script src="app.js"></script>
 </body>
 </html>
