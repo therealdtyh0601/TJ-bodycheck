@@ -1,0 +1,337 @@
+/* ------------------ 基础 ------------------ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+  background: radial-gradient(circle at top, #e0f2fe 0, #f4f6fb 40%, #f4f6fb 100%);
+  color: #0f172a;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.section {
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 软隐藏：简单 display:none，减少 bug 源 */
+.hidden {
+  display: none;
+}
+
+/* ------------------ 导航 ------------------ */
+
+.tianji-nav {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(248, 250, 252, 0.96);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.nav-group {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  background: rgba(148, 163, 184, 0.15);
+  color: #0f172a;
+}
+
+/* ------------------ 文本 ------------------ */
+
+h1, h2, h3 {
+  font-weight: 600;
+  color: #020617;
+}
+
+h1 { font-size: 2rem; margin-bottom: 10px; }
+h2 { font-size: 1.5rem; margin-bottom: 8px; }
+h3 { font-size: 1.2rem; margin-bottom: 6px; }
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+/* ------------------ 按钮 ------------------ */
+
+button {
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: #e5e7eb;
+  color: #111827;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.btn-ghost {
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-ghost:hover {
+  background: rgba(148, 163, 184, 0.15);
+  color: #0f172a;
+}
+
+.start-box {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* ------------------ 卡片 ------------------ */
+
+.card,
+.appendix-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.disclaimer-card {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid rgba(79, 70, 229, 0.4);
+  font-size: 0.85rem;
+  color: #4338ca;
+}
+
+/* ------------------ 问卷 ------------------ */
+
+#question-container {
+  margin-top: 10px;
+}
+
+.question {
+  margin-bottom: 8px;
+}
+
+.question-text {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 10px;
+  transition: 0.15s;
+}
+
+.option-label:hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #6366f1;
+}
+
+.assessment-actions {
+  margin-top: 22px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ------------------ 结果 ------------------ */
+
+.summary-block,
+.recommendations-block {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f9fafb;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.insight-bubble {
+  background: #eef2ff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(129, 140, 248, 0.7);
+  margin-bottom: 10px;
+}
+
+.result-nav {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Score Bars */
+
+.score-row {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.score-label {
+  width: 40px;
+  font-size: 0.9rem;
+}
+
+.score-bar-wrapper {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e5e7eb;
+  margin-right: 8px;
+}
+
+.score-bar {
+  height: 100%;
+  width: 0;
+  transition: width 0.5s ease;
+}
+
+.score-bar.wood  { background: linear-gradient(90deg, #16a34a, #4ade80); }
+.score-bar.fire  { background: linear-gradient(90deg, #f97316, #fb7185); }
+.score-bar.earth { background: linear-gradient(90deg, #eab308, #facc15); }
+.score-bar.metal { background: linear-gradient(90deg, #0ea5e9, #a5f3fc); }
+.score-bar.water { background: linear-gradient(90deg, #6366f1, #818cf8); }
+
+.score-value {
+  width: 40px;
+  font-size: 0.8rem;
+  text-align: right;
+  color: #64748b;
+}
+
+/* ------------------ 附录表格 ------------------ */
+
+.glossary-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr) minmax(0, 2fr);
+  gap: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.glossary-header {
+  font-weight: 600;
+}
+
+/* ------------------ 页脚 ------------------ */
+
+.footer {
+  padding: 18px 20px 30px;
+  font-size: 0.8rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+/* ------------------ 响应式 ------------------ */
+
+@media (max-width: 640px) {
+  .section {
+    padding: 32px 16px;
+  }
+
+  .nav-group {
+    gap: 4px;
+  }
+
+  .nav-btn {
+    font-size: 0.8rem;
+  }
+
+  .glossary-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
