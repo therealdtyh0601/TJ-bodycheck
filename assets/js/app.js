@@ -1,82 +1,71 @@
 /* ------------------------------------------------------ */
-/* app.js — Tianji App (Stability-Fixed Version)          */
+/* app.js — Tianji WebApp (Stable Production Version)     */
 /* ------------------------------------------------------ */
-/* 修复内容：                                              */
-/* 1. 永不因误触重绘问卷                                   */
-/* 2. 用户选择永不消失（实时缓存）                         */
-/* 3. Appendix 永远能打开                                 */
-/* 4. 防止语言按钮误触与 click 冒泡                        */
-/* 5. 安全 scroll + 重绘保护                                */
+/* 关键修复：                                              */
+/* 1. 语言切换不再重绘问卷                                 */
+/* 2. 用户答案永不丢失                                     */
+/* 3. 不再误触语言按钮                                     */
+/* 4. Appendix 永远可打开                                 */
+/* 5. 移动端不会误触                                       */
+/* 6. 所有滚动操作安全稳定                                */
 /* ------------------------------------------------------ */
 
 
-// =====================
-// 1. GLOBAL STATE
-// =====================
+/* ===============================
+   GLOBAL STATE
+================================= */
 
-// 保存用户选项（避免 DOM 重新渲染造成丢失）
-let savedAnswers = {};
-
-// 控制语言切换按钮的误触
-let allowLangSwitch = true;
-
-// 当前语言
+let savedAnswers = {}; // 永久保存用户答案（直到 reset）
 let currentLang = localStorage.getItem("tianji_lang") || "zh-CN";
 
+let allowLangSwitch = true;  // 防止误触语言按钮
 
-// =====================
-// 2. SAFE DOM READY
-// =====================
+
+
+/* ===============================
+   DOM READY
+================================= */
+
 document.addEventListener("DOMContentLoaded", () => {
+
+  // 设置语言（安全模式）
   switchLang(currentLang);
 
-  // 初始化问卷（只加载一次）
+  // 初始化问卷（只渲染一次）
   loadQuestions(false);
 
   // 加载附录
   loadAppendix();
 
-  // 绑定选项记录
+  // 启动选项持久化（radio 不会再丢失）
   setupAnswerPersistence();
 
-  // 防止语言按钮误触
+  // 保护语言按钮避免误触
   protectLanguageButtons();
+
+  // 更新显示语言标记
+  UI_updateLanguageIndicator(currentLang);
 });
 
 
 
-// =====================
-// 3. 防止语言按钮误触
-// =====================
-function protectLanguageButtons() {
-  const btns = document.querySelectorAll(".lang-btn");
+/* ===============================
+   LANGUAGE SWITCH (SAFE MODE)
+================================= */
 
-  btns.forEach(btn => {
-    btn.addEventListener("click", (event) => {
-      event.stopPropagation(); // 阻止冒泡
-    });
-
-    btn.addEventListener("touchstart", (event) => {
-      event.stopPropagation();
-    });
-  });
-}
-
-
-
-// =====================
-// 4. 语言切换（安全模式）
-// =====================
 function switchLang(lang) {
   if (!allowLangSwitch) return;
 
   allowLangSwitch = false;
-  setTimeout(() => allowLangSwitch = true, 500); // 防止双触发
+  setTimeout(() => allowLangSwitch = true, 500);
 
   currentLang = lang;
   localStorage.setItem("tianji_lang", lang);
 
-  // 只翻译标签，不重绘问题
+  // 更新UI语言标签
+  UI_updateLanguageIndicator(lang);
+
+  // 翻译静态文本
   document.querySelectorAll("[data-i18n]").forEach(el => {
     let key = el.getAttribute("data-i18n");
     if (LANG[lang] && LANG[lang][key]) {
@@ -84,28 +73,46 @@ function switchLang(lang) {
     }
   });
 
-  // 翻译问题文字（不清空、不重建选项）
+  // 翻译问卷文字（不重绘、不清空）
   translateQuestionTexts();
 }
 
 
 
-// =====================
-// 5. 翻译问题内容（安全写法）
-// =====================
+/* ===============================
+   PREVENT MIS-CLICK
+================================= */
+
+function protectLanguageButtons() {
+  const btns = document.querySelectorAll(".lang-btn");
+  btns.forEach(btn => {
+    btn.addEventListener("click", (e) => e.stopPropagation());
+    btn.addEventListener("touchstart", (e) => e.stopPropagation());
+  });
+}
+
+
+
+/* ===============================
+   TRANSLATE QUESTIONS ONLY
+   （不清空、不重建、不改变 radio）
+================================= */
+
 function translateQuestionTexts() {
   assessmentQuestions.forEach((q, index) => {
-    const qId = `q${index+1}`;
-    const el = document.querySelector(`[data-qid="${qId}"]`);
-    if (el) {
-      el.innerHTML = LANG[currentLang][q.i18nKey] || q.text;
+    const qId = `q${index + 1}`;
+
+    // 翻译问题标题
+    const questionEl = document.querySelector(`[data-qid="${qId}"]`);
+    if (questionEl) {
+      questionEl.innerHTML = LANG[currentLang][q.i18nKey] || q.text;
     }
 
     // 翻译选项
     q.options.forEach((opt, optIndex) => {
-      const optEl = document.querySelector(`#${qId}_opt${optIndex} + span`);
-      if (optEl) {
-        optEl.innerHTML = LANG[currentLang][opt.i18nKey] || opt.text;
+      const spanEl = document.querySelector(`#${qId}_opt${optIndex} + span`);
+      if (spanEl) {
+        spanEl.innerHTML = LANG[currentLang][opt.i18nKey] || opt.text;
       }
     });
   });
@@ -113,23 +120,24 @@ function translateQuestionTexts() {
 
 
 
-// =====================
-// 6. 加载题目（不会清空已选）
-// =====================
+/* ===============================
+   INITIAL QUESTION RENDER
+   （只执行一次，不重复渲染）
+================================= */
+
 function loadQuestions(isLangChange = false) {
+  if (isLangChange) return; // 禁止语言切换重绘问卷
+
   const container = document.getElementById("question-container");
-
-  // 仅首次渲染，语言切换不再重绘
-  if (isLangChange) return;
-
   container.innerHTML = "";
 
   assessmentQuestions.forEach((q, index) => {
-    const qId = `q${index+1}`;
+    const qId = `q${index + 1}`;
+
     const card = document.createElement("div");
     card.className = "card";
 
-    // 问题文字
+    // 问题标题
     const qt = document.createElement("div");
     qt.className = "question-text";
     qt.setAttribute("data-i18n", q.i18nKey);
@@ -153,8 +161,8 @@ function loadQuestions(isLangChange = false) {
       input.id = optId;
       input.value = opt.value;
 
-      // 恢复用户之前的选择
-      if (savedAnswers[qId] != null && savedAnswers[qId] == opt.value) {
+      // 恢复用户选择
+      if (savedAnswers[qId] == opt.value) {
         input.checked = true;
       }
 
@@ -174,9 +182,10 @@ function loadQuestions(isLangChange = false) {
 
 
 
-// =====================
-// 7. 保存用户选项（核心修复）
-// =====================
+/* ===============================
+   RADIO ANSWER PERSISTENCE
+================================= */
+
 function setupAnswerPersistence() {
   document.addEventListener("change", (event) => {
     if (event.target.type === "radio") {
@@ -187,14 +196,15 @@ function setupAnswerPersistence() {
 
 
 
-// =====================
-// 8. 生成结果（不受 redraw 影响）
-// =====================
+/* ===============================
+   GENERATE REPORT
+================================= */
+
 function generateReport() {
   const answers = {};
 
   assessmentQuestions.forEach((q, index) => {
-    const qId = `q${index+1}`;
+    const qId = `q${index + 1}`;
     const selected = document.querySelector(`input[name="${qId}"]:checked`);
     answers[qId] = selected ? parseInt(selected.value) : 0;
   });
@@ -212,26 +222,29 @@ function generateReport() {
 
 
 
-// =====================
-// 9. 安全滚动（避免跳回）
-// =====================
+/* ===============================
+   SAFE SCROLL
+================================= */
+
 function safeScrollTo(id) {
   setTimeout(() => {
     document.getElementById(id).scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
-  }, 50);
+  }, 60);
 }
 
 
 
-// =====================
-// 10. Reset（不会闪动）
-// =====================
+/* ===============================
+   RESET
+================================= */
+
 function resetAssessment() {
   savedAnswers = {};
-  document.querySelectorAll("input[type=radio]").forEach(el => el.checked = false);
+  document.querySelectorAll("input[type='radio']").forEach(el => (el.checked = false));
   document.getElementById("result").classList.add("hidden");
+
   safeScrollTo("assessment");
 }
