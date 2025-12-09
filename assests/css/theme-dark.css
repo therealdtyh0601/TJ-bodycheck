@@ -1,0 +1,275 @@
+/* ------------------------------------------------------ */
+/* THEME-DARK.CSS — TIANJI NIGHT THEME                    */
+/* 深夜蓝 · 五行气机 · 课程/咨询级 WebApp                  */
+/* ------------------------------------------------------ */
+
+/* Root Theme Tokens ------------------------------------ */
+
+:root {
+  /* 核心背景 */
+  --bg-body: #050816;
+  --bg-surface: #0b1120;
+  --bg-surface-alt: #0f172a;
+  --bg-elevated: #111827;
+  --bg-soft: rgba(15, 23, 42, 0.85);
+
+  /* 文本 */
+  --text-main: #e2e8f0;
+  --text-soft: #94a3b8;
+  --text-muted: #64748b;
+  --text-strong: #f9fafb;
+
+  /* 边框 / 分隔线 */
+  --border-subtle: rgba(148, 163, 184, 0.25);
+  --border-strong: rgba(148, 163, 184, 0.45);
+  --border-soft: rgba(15, 23, 42, 0.85);
+
+  /* 阴影 */
+  --shadow-soft: 0 8px 30px rgba(15, 23, 42, 0.7);
+  --shadow-elevated: 0 16px 40px rgba(15, 23, 42, 0.9);
+
+  /* Brand / Accent */
+  --accent: #6366f1;
+  --accent-soft: rgba(99, 102, 241, 0.15);
+  --accent-strong: #4f46e5;
+
+  /* 五行色 */
+  --wood:  #4ade80;
+  --fire:  #fb7185;
+  --earth: #facc15;
+  --metal: #a5f3fc;
+  --water: #818cf8;
+}
+
+/* Global Overrides ------------------------------------- */
+
+body {
+  background: radial-gradient(circle at top, #020617 0, #020617 20%, #020617 40%, #020617 60%, #020617 100%), var(--bg-body);
+  color: var(--text-main);
+}
+
+/* 顶部导航条 ------------------------------------------- */
+
+.tianji-nav {
+  background: linear-gradient(
+      to right,
+      rgba(15, 23, 42, 0.96),
+      rgba(15, 23, 42, 0.92),
+      rgba(15, 23, 42, 0.96)
+  );
+  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.9);
+}
+
+.nav-title {
+  color: var(--text-strong);
+}
+
+.nav-btn {
+  color: var(--text-soft);
+}
+
+.nav-btn:hover {
+  background: rgba(30, 64, 175, 0.3);
+  color: var(--text-main);
+}
+
+.lang-btn {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(148, 163, 184, 0.5);
+  color: var(--text-soft);
+}
+
+.lang-btn:hover {
+  background: rgba(37, 99, 235, 0.25);
+  color: var(--text-main);
+}
+
+/* Section Surfaces ------------------------------------- */
+
+.section {
+  background: transparent;
+}
+
+#home {
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.06) 0, rgba(15, 23, 42, 0) 45%),
+              radial-gradient(circle at bottom left, rgba(129, 140, 248, 0.14) 0, rgba(15, 23, 42, 0) 55%);
+}
+
+#assessment,
+#result,
+#appendix {
+  background: transparent;
+}
+
+/* Cards / Surfaces ------------------------------------- */
+
+.card,
+.appendix-card {
+  background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.12) 0, rgba(15, 23, 42, 0) 55%),
+              var(--bg-elevated);
+  border-color: rgba(148, 163, 184, 0.32);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Disclaimer & Alert ----------------------------------- */
+
+.disclaimer-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+  border-color: rgba(148, 163, 184, 0.5);
+  color: var(--text-soft);
+}
+
+/* Buttons ---------------------------------------------- */
+
+.btn-primary {
+  background: radial-gradient(circle at top left, #818cf8, #4f46e5);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.5);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.7);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg-surface-alt);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.btn-ghost {
+  border-color: rgba(148, 163, 184, 0.4);
+  color: var(--text-soft);
+}
+
+/* Questions -------------------------------------------- */
+
+.question {
+  border-bottom-color: rgba(148, 163, 184, 0.35);
+}
+
+.question-text {
+  color: var(--text-main);
+}
+
+.option-label {
+  color: var(--text-soft);
+}
+
+.option-label:hover {
+  color: var(--text-main);
+}
+
+/* Score Bars ------------------------------------------- */
+
+.score-bar-wrapper {
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.score-bar.wood {
+  background: linear-gradient(90deg, #22c55e, var(--wood));
+}
+
+.score-bar.fire {
+  background: linear-gradient(90deg, #f97316, var(--fire));
+}
+
+.score-bar.earth {
+  background: linear-gradient(90deg, #eab308, var(--earth));
+}
+
+.score-bar.metal {
+  background: linear-gradient(90deg, #22d3ee, var(--metal));
+}
+
+.score-bar.water {
+  background: linear-gradient(90deg, #60a5fa, var(--water));
+}
+
+/* Result Blocks ---------------------------------------- */
+
+.summary-block {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.94));
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.recommendations-block {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.94));
+  border-color: rgba(129, 140, 248, 0.4);
+}
+
+/* Insights / Bubbles ----------------------------------- */
+
+.insight-bubble {
+  background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.2), rgba(15, 23, 42, 0.96));
+  border-color: rgba(129, 140, 248, 0.6);
+}
+
+/* Appendix --------------------------------------------- */
+
+.appendix-card {
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), rgba(15, 23, 42, 0.98));
+}
+
+/* Glossary Grid ---------------------------------------- */
+
+.appendix-content .glossary-list {
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* Result Nav Buttons ----------------------------------- */
+
+.result-btn {
+  background: radial-gradient(circle at top left, #818cf8, #4f46e5);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.55);
+}
+
+/* Segment Control -------------------------------------- */
+
+.segment-control {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.segment {
+  color: var(--text-soft);
+}
+
+.segment.active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Small Utilities -------------------------------------- */
+
+.text-soft {
+  color: var(--text-soft);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-soft {
+  background: var(--bg-soft);
+}
+
+.border-subtle {
+  border-color: var(--border-subtle);
+}
+
+/* Mobile Tweaks ---------------------------------------- */
+
+@media (max-width: 768px) {
+  .tianji-nav {
+    padding-inline: 12px;
+  }
+
+  .section {
+    background: radial-gradient(circle at top, rgba(129, 140, 248, 0.12) 0, rgba(15, 23, 42, 0) 60%);
+  }
+}
