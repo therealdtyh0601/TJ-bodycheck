@@ -1,250 +1,108 @@
 /* ------------------------------------------------------ */
-/* app.js — Tianji WebApp (Stable Production Version)     */
-/* ------------------------------------------------------ */
-/* 关键修复：                                              */
-/* 1. 语言切换不再重绘问卷                                 */
-/* 2. 用户答案永不丢失                                     */
-/* 3. 不再误触语言按钮                                     */
-/* 4. Appendix 永远可打开                                 */
-/* 5. 移动端不会误触                                       */
-/* 6. 所有滚动操作安全稳定                                */
+/* app.js — Tianji Assessment Main Logic (Final Version)  */
 /* ------------------------------------------------------ */
 
-
-/* ===============================
-   GLOBAL STATE
-================================= */
-
-let savedAnswers = {}; // 永久保存用户答案（直到 reset）
-let currentLang = localStorage.getItem("tianji_lang") || "zh-CN";
-
-let allowLangSwitch = true;  // 防止误触语言按钮
-
-
-
-/* ===============================
-   DOM READY
-================================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  // 设置语言（安全模式）
-  switchLang(currentLang);
-
-  // 初始化问卷（只渲染一次）
-  loadQuestions(false);
-
-  // 加载附录
-  loadAppendix();
-
-  // 启动选项持久化（radio 不会再丢失）
-  setupAnswerPersistence();
-
-  // 保护语言按钮避免误触
-  protectLanguageButtons();
-
-  // 更新显示语言标记
-  UI_updateLanguageIndicator(currentLang);
-});
-
-
-
-/* ===============================
-   LANGUAGE SWITCH (SAFE MODE)
-================================= */
-
-function switchLang(lang) {
-  if (!allowLangSwitch) return;
-
-  allowLangSwitch = false;
-  setTimeout(() => allowLangSwitch = true, 500);
-
-  currentLang = lang;
-  localStorage.setItem("tianji_lang", lang);
-
-  // 更新UI语言标签
-  UI_updateLanguageIndicator(lang);
-
-  // 翻译静态文本
-  document.querySelectorAll("[data-i18n]").forEach(el => {
-    let key = el.getAttribute("data-i18n");
-    if (LANG[lang] && LANG[lang][key]) {
-      el.innerHTML = LANG[lang][key];
-    }
-  });
-
-  // 翻译问卷文字（不重绘、不清空）
-  translateQuestionTexts();
-}
-
-
-
-/* ===============================
-   PREVENT MIS-CLICK
-================================= */
-
-function protectLanguageButtons() {
-  const btns = document.querySelectorAll(".lang-btn");
-  btns.forEach(btn => {
-    btn.addEventListener("click", (e) => e.stopPropagation());
-    btn.addEventListener("touchstart", (e) => e.stopPropagation());
-  });
-}
-
-
-
-/* ===============================
-   TRANSLATE QUESTIONS ONLY
-   （不清空、不重建、不改变 radio）
-================================= */
-
-function translateQuestionTexts() {
-  assessmentQuestions.forEach((q, index) => {
-    const qId = `q${index + 1}`;
-
-    // 翻译问题标题
-    const questionEl = document.querySelector(`[data-qid="${qId}"]`);
-    if (questionEl) {
-      questionEl.innerHTML = LANG[currentLang][q.i18nKey] || q.text;
-    }
-
-    // 翻译选项
-    q.options.forEach((opt, optIndex) => {
-      const spanEl = document.querySelector(`#${qId}_opt${optIndex} + span`);
-      if (spanEl) {
-        spanEl.innerHTML = LANG[currentLang][opt.i18nKey] || opt.text;
-      }
-    });
-  });
-}
-
-
-
-/* ===============================
-   INITIAL QUESTION RENDER
-   （只执行一次，不重复渲染）
-================================= */
-
-function loadQuestions(isLangChange = false) {
-  if (isLangChange) return; // 禁止语言切换重绘问卷
-
+/* 题目数据从 assessment.js 注入 */
+function loadQuestions() {
   const container = document.getElementById("question-container");
   container.innerHTML = "";
 
-  assessmentQuestions.forEach((q, index) => {
-    const qId = `q${index + 1}`;
-
+  QUESTIONS.forEach((q, index) => {
     const card = document.createElement("div");
     card.className = "card";
 
-    // 问题标题
-    const qt = document.createElement("div");
-    qt.className = "question-text";
-    qt.setAttribute("data-i18n", q.i18nKey);
-    qt.setAttribute("data-qid", qId);
-    qt.innerHTML = LANG[currentLang][q.i18nKey] || q.text;
-
-    // 选项
-    const optWrap = document.createElement("div");
-    optWrap.className = "options";
-
+    let optionsHTML = "";
     q.options.forEach((opt, optIndex) => {
-      const optId = `${qId}_opt${optIndex}`;
-
-      const label = document.createElement("label");
-      label.className = "option-label";
-      label.setAttribute("for", optId);
-
-      const input = document.createElement("input");
-      input.type = "radio";
-      input.name = qId;
-      input.id = optId;
-      input.value = opt.value;
-
-      // 恢复用户选择
-      if (savedAnswers[qId] == opt.value) {
-        input.checked = true;
-      }
-
-      const textSpan = document.createElement("span");
-      textSpan.innerHTML = LANG[currentLang][opt.i18nKey] || opt.text;
-
-      label.appendChild(input);
-      label.appendChild(textSpan);
-      optWrap.appendChild(label);
+      const inputId = `q${index}_opt${optIndex}`;
+      optionsHTML += `
+        <label for="${inputId}" class="option-label">
+          <input type="radio" name="q${index}" id="${inputId}" value="${opt.score}" />
+          ${opt.text}
+        </label>
+      `;
     });
 
-    card.appendChild(qt);
-    card.appendChild(optWrap);
+    card.innerHTML = `
+      <div class="question">
+        <div class="question-text">${q.text}</div>
+        <div class="options">${optionsHTML}</div>
+      </div>
+    `;
+
     container.appendChild(card);
   });
 }
 
 
-
-/* ===============================
-   RADIO ANSWER PERSISTENCE
-================================= */
-
-function setupAnswerPersistence() {
-  document.addEventListener("change", (event) => {
-    if (event.target.type === "radio") {
-      savedAnswers[event.target.name] = event.target.value;
-    }
-  });
-}
-
-
-
-/* ===============================
-   GENERATE REPORT
-================================= */
+/* 计算结果 -------------------------------------------- */
 
 function generateReport() {
-  const answers = {};
+  const results = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
 
-  assessmentQuestions.forEach((q, index) => {
-    const qId = `q${index + 1}`;
-    const selected = document.querySelector(`input[name="${qId}"]:checked`);
-    answers[qId] = selected ? parseInt(selected.value) : 0;
+  // 遍历所有题目
+  QUESTIONS.forEach((q, index) => {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    if (selected) {
+      const scoreObj = JSON.parse(selected.value); 
+      // opt.score 是 {wood:0, fire:1,...}
+      Object.keys(scoreObj).forEach(key => {
+        results[key] += scoreObj[key];
+      });
+    }
   });
 
-  const scores = calculateFiveElementScores(answers);
+  renderBars(results);
+  renderSummary(results);
+  renderRecommendations(results);
 
-  renderScoreBars(scores);
-  renderSummary(scores);
-  renderRecommendations(scores);
-
-  document.getElementById("result").classList.remove("hidden");
-
-  safeScrollTo("result");
+  // 显示结果页
+  showSection("result");
 }
 
 
+/* 结果：五行条形图 ------------------------------- */
 
-/* ===============================
-   SAFE SCROLL
-================================= */
+function renderBars(results) {
+  const container = document.getElementById("score-bars");
+  container.innerHTML = "";
 
-function safeScrollTo(id) {
-  setTimeout(() => {
-    document.getElementById(id).scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }, 60);
+  Object.keys(results).forEach(type => {
+    container.innerHTML += `
+      <div class="score-row">
+        <div class="score-label">${type.toUpperCase()}</div>
+        <div class="score-bar-wrapper">
+          <div class="score-bar ${type}" style="width: ${results[type] * 15}%;"></div>
+        </div>
+      </div>
+    `;
+  });
 }
 
 
+/* 结果摘要 -------------------------------------- */
+function renderSummary(results) {
+  const block = document.getElementById("summary-block");
+  block.innerHTML = getSummaryText(results); // 来自 recommendations.js 或你自己的逻辑
+}
 
-/* ===============================
-   RESET
-================================= */
+
+/* 改善建议 -------------------------------------- */
+function renderRecommendations(results) {
+  const block = document.getElementById("recommendations-block");
+  block.innerHTML = getRecommendationText(results);
+}
+
+
+/* 重置表单 -------------------------------------- */
 
 function resetAssessment() {
-  savedAnswers = {};
-  document.querySelectorAll("input[type='radio']").forEach(el => (el.checked = false));
-  document.getElementById("result").classList.add("hidden");
-
-  safeScrollTo("assessment");
+  document.querySelectorAll("input[type=radio]").forEach(r => r.checked = false);
+  showSection("assessment");
 }
+
+
+/* 初始化 ---------------------------------------- */
+window.onload = function () {
+  loadQuestions();
+  showSection("home");
+};
