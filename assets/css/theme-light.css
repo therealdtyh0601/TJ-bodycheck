@@ -1,0 +1,273 @@
+/* ------------------------------------------------------ */
+/* THEME-LIGHT.CSS — TIANJI LIGHT THEME                   */
+/* 清爽 · 健康报告 · Clinic Dashboard 风格                 */
+/* ------------------------------------------------------ */
+
+/* Root Tokens ------------------------------------------ */
+
+:root {
+  /* 背景 */
+  --bg-body-light: #f4f6fb;
+  --bg-surface-light: #ffffff;
+  --bg-surface-alt-light: #f9fafb;
+  --bg-elevated-light: #ffffff;
+
+  /* 文本 */
+  --text-main-light: #0f172a;
+  --text-soft-light: #64748b;
+  --text-muted-light: #94a3b8;
+  --text-strong-light: #020617;
+
+  /* 边框 */
+  --border-subtle-light: rgba(148, 163, 184, 0.35);
+  --border-strong-light: rgba(148, 163, 184, 0.55);
+
+  /* 阴影 */
+  --shadow-soft-light: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+  /* Brand / Accent */
+  --accent-light: #4f46e5;
+  --accent-soft-light: rgba(79, 70, 229, 0.08);
+
+  /* 五行色（与暗色版一致，保持认知） */
+  --wood:  #16a34a;
+  --fire:  #f97373;
+  --earth: #eab308;
+  --metal: #0ea5e9;
+  --water: #6366f1;
+}
+
+/* Global Overrides ------------------------------------- */
+
+body {
+  background: radial-gradient(circle at top, #e0f2fe 0, #f4f6fb 35%, #f4f6fb 100%);
+  color: var(--text-main-light);
+}
+
+/* Text ------------------------------------------------- */
+
+h1, h2, h3, h4 {
+  color: var(--text-strong-light);
+}
+
+p, li {
+  color: var(--text-soft-light);
+}
+
+/* Sections --------------------------------------------- */
+
+.section {
+  background: transparent;
+}
+
+/* Home Section 背景轻微过渡 --------------------------- */
+
+#home {
+  background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.18) 0, rgba(244, 246, 251, 0) 55%);
+}
+
+/* Nav Bar ---------------------------------------------- */
+
+.tianji-nav {
+  background: rgba(248, 250, 252, 0.96);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.nav-title {
+  color: var(--text-strong-light);
+}
+
+.nav-btn {
+  color: var(--text-soft-light);
+}
+
+.nav-btn:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-main-light);
+}
+
+.lang-btn {
+  background: #f9fafb;
+  border-color: rgba(148, 163, 184, 0.6);
+  color: var(--text-soft-light);
+}
+
+.lang-btn:hover {
+  background: rgba(79, 70, 229, 0.08);
+  color: var(--text-main-light);
+}
+
+/* Disclaimer / Alert ---------------------------------- */
+
+.disclaimer-card {
+  background: #eef2ff;
+  border-color: rgba(79, 70, 229, 0.45);
+  color: #4338ca;
+}
+
+/* Cards / Surfaces ------------------------------------ */
+
+.card,
+.appendix-card {
+  background: var(--bg-surface-light);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle-light);
+  box-shadow: var(--shadow-soft-light);
+}
+
+/* Buttons --------------------------------------------- */
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #111827;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+.btn-ghost {
+  border-color: rgba(148, 163, 184, 0.5);
+  color: var(--text-soft-light);
+}
+
+.btn-ghost:hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+/* Inputs ---------------------------------------------- */
+
+input[type="text"],
+input[type="number"] {
+  background: #f9fafb;
+  border-color: rgba(148, 163, 184, 0.65);
+  color: var(--text-main-light);
+}
+
+/* Questions ------------------------------------------- */
+
+.question {
+  border-bottom-color: rgba(148, 163, 184, 0.35);
+}
+
+.question-text {
+  color: var(--text-main-light);
+}
+
+.option-label {
+  color: var(--text-soft-light);
+}
+
+.option-label:hover {
+  color: var(--text-main-light);
+}
+
+/* Result Blocks -------------------------------------- */
+
+.summary-block,
+.recommendations-block {
+  background: var(--bg-surface-alt-light);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Score Bars ----------------------------------------- */
+
+.score-bar-wrapper {
+  background: #e5e7eb;
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+
+.score-bar.wood {
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+}
+
+.score-bar.fire {
+  background: linear-gradient(90deg, #f97316, #fb7185);
+}
+
+.score-bar.earth {
+  background: linear-gradient(90deg, #eab308, #facc15);
+}
+
+.score-bar.metal {
+  background: linear-gradient(90deg, #0ea5e9, #a5f3fc);
+}
+
+.score-bar.water {
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+}
+
+/* Insight Bubble ------------------------------------- */
+
+.insight-bubble {
+  background: #eef2ff;
+  border-color: rgba(129, 140, 248, 0.7);
+  color: #1e293b;
+}
+
+/* Appendix ------------------------------------------- */
+
+.appendix-card {
+  background: #ffffff;
+}
+
+.appendix-content .glossary-list {
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+/* Result Nav Buttons --------------------------------- */
+
+.result-btn {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+  color: #ffffff;
+}
+
+/* Segment Control ------------------------------------ */
+
+.segment-control {
+  background: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+}
+
+.segment {
+  color: var(--text-soft-light);
+}
+
+.segment.active {
+  background: var(--accent-light);
+  color: #ffffff;
+}
+
+/* Utility Text --------------------------------------- */
+
+.text-soft {
+  color: var(--text-soft-light);
+}
+
+.text-muted {
+  color: var(--text-muted-light);
+}
+
+/* Mobile Tweaks -------------------------------------- */
+
+@media (max-width: 768px) {
+  .tianji-nav {
+    background: rgba(248, 250, 252, 0.98);
+  }
+
+  .section {
+    background: radial-gradient(circle at top, rgba(129, 140, 248, 0.12) 0, rgba(244, 246, 251, 0) 55%);
+  }
+}
