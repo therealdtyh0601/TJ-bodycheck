@@ -1,108 +1,205 @@
 /* ------------------------------------------------------ */
-/* app.js — Tianji Assessment Main Logic (Final Version)  */
+/* app.js — Tianji Assessment Core Logic (Stable Build)   */
 /* ------------------------------------------------------ */
 
-/* 题目数据从 assessment.js 注入 */
-function loadQuestions() {
+/* GLOBAL STATES ---------------------------------------- */
+let userAnswers = {};          // Stores all answers
+let currentLang = "zh-CN";     // Default language
+
+
+/* ------------------------------------------------------ */
+/* 1. RENDER QUESTIONS                                    */
+/* ------------------------------------------------------ */
+
+function renderQuestions() {
   const container = document.getElementById("question-container");
   container.innerHTML = "";
 
-  QUESTIONS.forEach((q, index) => {
+  assessmentQuestions.forEach((q, index) => {
+    const qId = `q${index + 1}`;
+
     const card = document.createElement("div");
     card.className = "card";
 
-    let optionsHTML = "";
+    let questionHTML = `
+      <div class="question">
+        <div class="question-text">${q.text}</div>
+        <div class="options">
+    `;
+
     q.options.forEach((opt, optIndex) => {
-      const inputId = `q${index}_opt${optIndex}`;
-      optionsHTML += `
-        <label for="${inputId}" class="option-label">
-          <input type="radio" name="q${index}" id="${inputId}" value="${opt.score}" />
+      const optId = `${qId}_opt${optIndex}`;
+
+      questionHTML += `
+        <label class="option-label" for="${optId}">
+          <input 
+            type="radio" 
+            id="${optId}" 
+            name="${qId}"
+            value='${opt.value}'
+            ${userAnswers[qId]?.raw === opt.value ? "checked" : ""}
+          />
           ${opt.text}
         </label>
       `;
     });
 
-    card.innerHTML = `
-      <div class="question">
-        <div class="question-text">${q.text}</div>
-        <div class="options">${optionsHTML}</div>
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-
-/* 计算结果 -------------------------------------------- */
-
-function generateReport() {
-  const results = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
-
-  // 遍历所有题目
-  QUESTIONS.forEach((q, index) => {
-    const selected = document.querySelector(`input[name="q${index}"]:checked`);
-    if (selected) {
-      const scoreObj = JSON.parse(selected.value); 
-      // opt.score 是 {wood:0, fire:1,...}
-      Object.keys(scoreObj).forEach(key => {
-        results[key] += scoreObj[key];
-      });
-    }
-  });
-
-  renderBars(results);
-  renderSummary(results);
-  renderRecommendations(results);
-
-  // 显示结果页
-  showSection("result");
-}
-
-
-/* 结果：五行条形图 ------------------------------- */
-
-function renderBars(results) {
-  const container = document.getElementById("score-bars");
-  container.innerHTML = "";
-
-  Object.keys(results).forEach(type => {
-    container.innerHTML += `
-      <div class="score-row">
-        <div class="score-label">${type.toUpperCase()}</div>
-        <div class="score-bar-wrapper">
-          <div class="score-bar ${type}" style="width: ${results[type] * 15}%;"></div>
+    questionHTML += `
         </div>
       </div>
     `;
+
+    card.innerHTML = questionHTML;
+    container.appendChild(card);
+  });
+
+  bindInputListeners();
+}
+
+
+/* ------------------------------------------------------ */
+/* 2. STORE ANSWERS SAFELY                                */
+/* ------------------------------------------------------ */
+
+function bindInputListeners() {
+  const radios = document.querySelectorAll("input[type=radio]");
+
+  radios.forEach(radio => {
+    radio.addEventListener("change", () => {
+      const qId = radio.name;
+      const parsed = JSON.parse(radio.value);
+
+      userAnswers[qId] = {
+        raw: radio.value,
+        score: parsed.score
+      };
+    });
   });
 }
 
 
-/* 结果摘要 -------------------------------------- */
-function renderSummary(results) {
-  const block = document.getElementById("summary-block");
-  block.innerHTML = getSummaryText(results); // 来自 recommendations.js 或你自己的逻辑
+/* ------------------------------------------------------ */
+/* 3. GENERATE REPORT                                      */
+/* ------------------------------------------------------ */
+
+function generateReport() {
+  // Must answer at least 1 question
+  const answered = Object.keys(userAnswers).length;
+  if (answered === 0) {
+    alert("请先完成问卷再生成报告。");
+    return;
+  }
+
+  const score = calculateFiveElementScores(userAnswers);
+  renderScoreBars(score);
+  renderSummary(score);
+  renderRecommendations(score);
+
+  // Show result section
+  document.getElementById("result").classList.remove("hidden");
+  safeScrollTo("result");
 }
 
 
-/* 改善建议 -------------------------------------- */
-function renderRecommendations(results) {
-  const block = document.getElementById("recommendations-block");
-  block.innerHTML = getRecommendationText(results);
+/* ------------------------------------------------------ */
+/* 3A. SCORE BAR RENDERING                                 */
+/* ------------------------------------------------------ */
+
+function renderScoreBars(score) {
+  const container = document.getElementById("score-bars");
+  container.innerHTML = "";
+
+  const elements = [
+    { key: "wood",  label: "木" },
+    { key: "fire",  label: "火" },
+    { key: "earth", label: "土" },
+    { key: "metal", label: "金" },
+    { key: "water", label: "水" }
+  ];
+
+  elements.forEach(el => {
+    const percent = score[el.key];
+
+    container.innerHTML += `
+      <div class="score-row">
+        <div class="score-label">${el.label}</div>
+        <div class="score-bar-wrapper">
+          <div class="score-bar ${el.key}" style="width:${percent}%"></div>
+        </div>
+        <div class="score-value">${percent}%</div>
+      </div>
+    `;
+  });
 }
 
 
-/* 重置表单 -------------------------------------- */
+/* ------------------------------------------------------ */
+/* 3B. SUMMARY BLOCK                                       */
+/* ------------------------------------------------------ */
+
+function renderSummary(score) {
+  const blk = document.getElementById("summary-block");
+
+  let dominant = Object.entries(score).sort((a,b) => b[1] - a[1])[0][0];
+
+  const map = {
+    wood: "木象偏旺：压力外散、情绪张力高、肝气上浮。",
+    fire: "火象偏旺：神明太亮、睡不深、精神紧绷发热。",
+    earth: "土象偏旺：消化疲乏、吃完累、身体沉重。",
+    metal: "金象偏旺：皮肤燥、鼻敏、呼吸浅、界限下降。",
+    water: "水象偏弱：底气不足、耐力下降、精神储备不足。"
+  };
+
+  blk.innerHTML = `
+    <div class="insight-bubble">
+      <strong>主导节律：</strong> ${map[dominant]}
+    </div>
+  `;
+}
+
+
+/* ------------------------------------------------------ */
+/* 3C. RECOMMENDATIONS                                    */
+/* ------------------------------------------------------ */
+
+function renderRecommendations(score) {
+  const blk = document.getElementById("recommendations-block");
+  blk.innerHTML = getRecommendations(score);
+}
+
+
+/* ------------------------------------------------------ */
+/* 4. RESET ASSESSMENT                                     */
+/* ------------------------------------------------------ */
 
 function resetAssessment() {
-  document.querySelectorAll("input[type=radio]").forEach(r => r.checked = false);
-  showSection("assessment");
+  userAnswers = {};
+  renderQuestions();
+  document.getElementById("result").classList.add("hidden");
+  safeScrollTo("assessment");
 }
 
 
-/* 初始化 ---------------------------------------- */
-window.onload = function () {
-  loadQuestions();
-  showSection("home");
-};
+/* ------------------------------------------------------ */
+/* 5. SECTION SMOOTH SCROLL                                */
+/* ------------------------------------------------------ */
+
+function safeScrollTo(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  setTimeout(() => {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 80);
+}
+
+
+/* ------------------------------------------------------ */
+/* 6. INITIALIZATION                                       */
+/* ------------------------------------------------------ */
+
+window.addEventListener("DOMContentLoaded", () => {
+  renderQuestions();
+  loadAppendix();     // from appendix.js
+  applyI18n();        // from i18n.js
+});
